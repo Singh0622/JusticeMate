@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>JusticeMate - AI Legal Assistant</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #333;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100vh; padding-top: 60px;
+  }
+  .container {
+    background: #fff; border-radius: 20px; width: 450px; max-width: 95%;
+    box-shadow: 0 8px 30px rgba(99, 52, 155, 0.15);
+    padding: 35px 30px; box-sizing: border-box;
+  }
+  h1 {
+    text-align: center; font-weight: 700; color: #4b23a0;
+    margin-bottom: 20px; font-size: 30px; letter-spacing: 1.2px;
+  }
+  p.description {
+    color: #6b6b6b; font-size: 14px; text-align: center;
+    margin-bottom: 30px; line-height: 1.6;
+  }
+  form label {
+    display: block; font-weight: 600; margin-bottom: 8px; color: #4b23a0;
+  }
+  form input[type='text'], form input[type='email'], form input[type='tel'], form textarea, form select, form input[type='date'] {
+    width: 100%; padding: 12px 15px; border: 1.5px solid #ddd; border-radius: 10px;
+    box-sizing: border-box; margin-bottom: 22px; font-size: 15px;
+    transition: border-color 0.3s ease;
+  }
+  form input[type='text']:focus, form input[type='email']:focus, form input[type='tel']:focus,
+  form textarea:focus, form select:focus, form input[type='date']:focus {
+    outline: none; border-color: #764ba2;
+    box-shadow: 0 0 10px rgba(118, 75, 162, 0.4);
+  }
+  form textarea {
+    resize: vertical; min-height: 90px;
+  }
+  form button {
+    background-color: #764ba2; color: #fff; border: none;
+    padding: 14px 16px; border-radius: 12px; font-size: 17px;
+    cursor: pointer; width: 100%; font-weight: 700;
+    transition: background-color 0.2s ease;
+  }
+  form button:hover {
+    background-color: #5a368c;
+  }
+  .result {
+    margin-top: 25px; background: #e9e4f0; color: #422d7c;
+    border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(99, 52, 155, 0.09);
+    font-size: 15px; line-height: 1.5; white-space: pre-wrap;
+  }
+  .footer {
+    margin-top: 36px; font-size: 13px; color: #8a8a8a;
+    text-align: center; user-select: none;
+  }
+</style>
+</head>
+<body>
+  <div class='container'>
+    <h1>JusticeMate</h1>
+    <p class='description'>Your trusted AI-powered legal assistant. Describe your issue and select the type of help you need.</p>
+
+    <form id='justiceForm'>
+      <label for='issueInput'>Describe your legal issue or paste legal text:</label>
+      <textarea id='issueInput' name='issueInput' placeholder='Eg. Our landlord refuses to return the deposit...' required></textarea>
+
+      <label for='helpType'>Type of Help Needed:</label>
+      <select id='helpType' name='helpType' required>
+        <option value='rights'>Summarize Rights</option>
+        <option value='complaint'>Draft Complaint Letter</option>
+        <option value='mediation'>Mediation Assistance</option>
+        <option value='legalese-to-plain'>Translate Legalese</option>
+      </select>
+
+      <label for='userName'>Your Full Name (for complaint):</label>
+      <input type='text' id='userName' name='userName' placeholder='Full Name' />
+
+      <label for='contactInfo'>Contact Info (for complaint):</label>
+      <input type='text' id='contactInfo' name='contactInfo' placeholder='Email or Phone' />
+
+      <label for='otherParty'>Name of Other Party (for complaint/mediation):</label>
+      <input type='text' id='otherParty' name='otherParty' placeholder='Name of person or organization' />
+
+      <label for='incidentDate'>Date of Incident (for complaint):</label>
+      <input type='date' id='incidentDate' name='incidentDate' />
+
+      <label for='incidentLocation'>Location of Incident (for complaint):</label>
+      <input type='text' id='incidentLocation' name='incidentLocation' placeholder='Where did it happen?' />
+
+      <button type='submit'>Submit</button>
+    </form>
+
+    <div id='result' class='result' style='display:none;'></div>
+
+    <div class='footer'>© 2025 JusticeMate - Empowering Justice for All</div>
+  </div>
+
+  <script>
+    const form = document.getElementById('justiceForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = 'JusticeMate is thinking...';
+
+      const data = {
+        issue_description: form.issueInput.value.trim(),
+        help_type: form.helpType.value,
+        full_name: form.userName.value.trim(),
+        contact_info: form.contactInfo.value.trim(),
+        respondent_name: form.otherParty.value.trim(),
+        incident_date: form.incidentDate.value,
+        incident_location: form.incidentLocation.value.trim()
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/api/justicemate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        resultDiv.textContent = 'JusticeMate says:\n\n' + result.result;
+      } catch (error) {
+        resultDiv.textContent = 'Network error. Please try again later.';
+        console.error('Fetch error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
